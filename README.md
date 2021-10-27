@@ -1,4 +1,4 @@
-#Hey Folks, im Thiago (James) Oliveira
+# Hey Folks, im Thiago (James) Oliveira
 
 - 👋 Hi, I’m @thiagomoz
 - 👀 I’m interested in ...
@@ -6,4 +6,4 @@
 - 💞️ I’m looking to collaborate on ...
 - 📫 How to reach me ...
 
-[![Linkedin][(https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/thiagomoz/)
+[![Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/thiagomoz/)
