@@ -28,7 +28,7 @@ function Ambitions() {
 //Assume 10 more awesome ambitions here ;)
 	} 
  ```
- <h3 align="left">Complementing</h3>
+ <h3 align="left">More About Me</h3>
  
  
  - 🧑‍💻 Currently working as Principal Product Designer @ <a href="https://www.tauria.com">Tauria</a>
