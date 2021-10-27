@@ -32,7 +32,7 @@ function Ambitions() {
  
  
  - 🧑‍💻 Currently working as Principal Product Designer @ <a href="https://www.tauria.com">Tauria</a>
- - 📚 Learning React & React Native
+ - 📚 Learning React, React Native & Nodejs
  - 🌎 Looking to collaborate on open source projetcs to improve devs and designers workflow
  
  #
