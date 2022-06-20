@@ -31,7 +31,7 @@ function Ambitions() {
  <h3 align="left">More About Me</h3>
  
  
- - 🧑‍💻 Currently working as Principal Product Designer @ <a href="https://www.tauria.com">Tauria</a>
+ - 🧑‍💻 Currently working as Design Engineer @ <a href="https://www.headify.com.br">Headify</a>
  - 📚 Learning React, React Native & Nodejs
  - 🌎 Looking to collaborate on open source projetcs to improve devs and designers workflow
  - ❓ Fun Fact - english friends call me James
