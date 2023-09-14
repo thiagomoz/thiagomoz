@@ -1,4 +1,4 @@
-<h1> Hello World, I'm Thiago Oliveira<img src="https://media2.giphy.com/media/iQ163W1eQ2tsqWbP5U/giphy.gif?cid=790b7611a2d499464e384ee2e0f4f5e337b88515c6af72d1&rid=giphy.gif&ct=s" width="50"> </h1>
+<h1> Hello World, I'm Thiago!</h1>
 
 ```javascript
  
