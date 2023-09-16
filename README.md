@@ -19,7 +19,6 @@
 
 ### Stack & Tools 🛠️
 
-#### Development
 <a href="https://www.typescriptlang.org/" title="Typescript"><img src="https://github.com/get-icon/geticon/raw/master/icons/typescript-icon.svg" alt="Typescript" width="21px" height="21px"></a>
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" title="JavaScript"><img src="https://github.com/get-icon/geticon/raw/master/icons/javascript.svg" alt="JavaScript" width="21px" height="21px"></a>
 <a href="https://tc39.es/ecma262/" title="ECMAScript 6"><img src="https://github.com/get-icon/geticon/raw/master/icons/es6.svg" alt="ECMAScript 6" width="21px" height="21px"></a>
@@ -37,9 +36,7 @@
 <a href="https://code.visualstudio.com/" title="Visual Studio Code"><img src="https://github.com/get-icon/geticon/raw/master/icons/visual-studio-code.svg" alt="Visual Studio Code" width="21px" height="21px"></a>
 <a href="https://reactnative.dev/" title="React Native"><img src="https://github.com/get-icon/geticon/raw/master/icons/react.svg" alt="React Native" width="21px" height="21px"></a>
 <a href="https://www.gatsbyjs.com/" title="Gatsby"><img src="https://github.com/get-icon/geticon/raw/master/icons/gatsby.svg" alt="Gatsby" width="21px" height="21px"></a>
-
-#### Design 
+<a href="https://hyper.is/" title="Hyper"><img src="https://github.com/get-icon/geticon/blob/master/icons/hyper.svg" alt="Hyper" width="21px" height="21px"></a>
 <a href="https://www.adobe.com/products/photoshop.html" title="Adobe Photoshop"><img src="https://github.com/get-icon/geticon/raw/master/icons/adobe-photoshop.svg" alt="Adobe Photoshop" width="21px" height="21px"></a>
 <a href="https://www.adobe.com/products/illustrator.html" title="Adobe Illustrator"><img src="https://github.com/get-icon/geticon/raw/master/icons/adobe-illustrator.svg" alt="Adobe Illustrator" width="21px" height="21px"></a>
 <a href="https://www.figma.com" title="Figma"><img src="https://github.com/get-icon/geticon/blob/master/icons/figma.svg" alt="Figma" width="21px" height="21px"></a>
-<a href="https://www.webflow.com" title="Webflow"><img src="https://github.com/get-icon/geticon/blob/master/icons/webflow.svg" alt="Webflow" width="21px" height="21px"></a>
