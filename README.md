@@ -17,6 +17,7 @@
 🎥 [Tiktok](https://tiktok.com/@headify) <br>
 💼 [LinkedIn](https://linkedin.com/thiagomoz) <be>
 
+### Stack & Tools 🛠️
 
 <a href="https://www.typescriptlang.org/" title="Typescript"><img src="https://github.com/get-icon/geticon/raw/master/icons/typescript-icon.svg" alt="Typescript" width="21px" height="21px"></a>
 <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" title="JavaScript"><img src="https://github.com/get-icon/geticon/raw/master/icons/javascript.svg" alt="JavaScript" width="21px" height="21px"></a>
