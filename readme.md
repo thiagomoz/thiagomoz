@@ -1,7 +1,7 @@
 ### Helllo world, I'm Thiago! 👋
 
 😎 CTO @ [Terra Fértil](https://terrafertil.com.br) <br>
-🇧🇷 Proudly from Brazil 🇧🇷 <br>
+🇧🇷 Proudly from Brazil <br>
 ❓ English friends call me James <br>
 🚀 Digitizing experience and humanizing technology
 
