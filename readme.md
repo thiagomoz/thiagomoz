@@ -7,7 +7,7 @@
 
 ### Currently working on 👨‍💻
 
-🌱 Currently creating the future of agri sales intelligence - [SEED](https://seed-green.vercel.app) <br>
+🌱 Currently creating the future of agri sales intelligence - SEED <br>
 💊 Currently building the infrastructure for smarter health decisions - ARVI <br>
 
 ### Let's connect 🌐
