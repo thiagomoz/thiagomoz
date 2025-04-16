@@ -1,6 +1,6 @@
 ### Helllo world, I'm Thiago! 👋
 
-😎 Founder & Engineer @ [headify.](https://headify.com.br) <br>
+😎 CTO @ [Terra Fértil](https://terrafertil.com.br) <br>
 🇧🇷 Proudly from Brazil 🇧🇷 <br>
 ❓ English friends call me James <br>
 🚀 Digitizing experience and humanizing technology
