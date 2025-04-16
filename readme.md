@@ -7,8 +7,8 @@
 
 ### Currently working on 👨‍💻
 
-🧩 Your startup's tech department - [headify.](https://headify.com.br) <br>
-🌎 Open source project to improve code and design workflow <br>
+🌱 Currently creating the future of agri sales intelligence - [SEED](https://seed-green.vercel.app) <br>
+💊 Currently building the infrastructure for smarter health decisions - ARVI <br>
 
 ### Let's connect 🌐
 
