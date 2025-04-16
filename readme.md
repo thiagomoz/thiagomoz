@@ -1,8 +1,8 @@
 ### Helllo world, I'm Thiago! 👋
 
 😎 Founder & Engineer @ [headify.](https://headify.com.br) <br>
-🌎 Hometown: Proudly from Brazil 🇧🇷 <br>
-❓ Fun Fact - English friends call me James <br>
+🇧🇷 Proudly from Brazil 🇧🇷 <br>
+❓ English friends call me James <br>
 🚀 Digitizing experience and humanizing technology
 
 ### Currently working on 👨‍💻
