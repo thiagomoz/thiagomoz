@@ -12,9 +12,7 @@
 
 ### Let's connect 🌐
 
-🌐 [Site](https://headify.com.br) <br>
 📸 [Instagram](https://instagram.com/thiagomoz) <br>
-🎥 [Tiktok](https://tiktok.com/@headify) <br>
 💼 [LinkedIn](https://linkedin.com/thiagomoz) <be>
 
 ### Stack & Tools 🛠️
