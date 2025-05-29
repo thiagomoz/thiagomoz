@@ -7,8 +7,8 @@
 
 ### Currently working on 👨‍💻
 
-🌱 Currently creating the future of agri sales intelligence - SEED <br>
-💊 Currently building the infrastructure for smarter health decisions - ARVI <br>
+🌱 Currently creating the future of agri sales intelligence - [SEED](https://github.com/seed-tf) <br>
+💊 Currently building the infrastructure for smarter health decisions - [ARVI](https://github.com/arvisaude) <br>
 
 ### Let's connect 🌐
 
