@@ -1,14 +1,14 @@
 ### Helllo world, I'm Thiago! 👋
 
-😎 CTO @ [Terra Fértil](https://terrafertil.com.br) <br>
+😎 Founder @ [Unem](https://unem.io) <br>
 🇧🇷 Proudly from Brazil <br>
 ❓ English friends call me James <br>
 🚀 Digitizing experience and humanizing technology
 
 ### Currently working on 👨‍💻
 
-🌱 Currently creating the future of agri sales intelligence - [SEED](https://github.com/seed-tf) <br>
-💊 Currently building the infrastructure for smarter health decisions - [ARVI](https://github.com/arvisaude) <br>
+🟢 Currently creating the future of agri sales intelligence - [SEED](https://github.com/seed-tf) <br>
+🔵 Currently building the infrastructure for smarter restaurant decisions - [UNEM](https://github.com/unem-io) <br>
 
 ### Let's connect 🌐
 
