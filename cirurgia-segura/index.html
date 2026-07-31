@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f4c81">
+  <meta name="description" content="Protótipo de apoio à Cirurgia Segura — checklist OMS digital + indicadores. Ambiente de simulação com dados fictícios.">
+  <title>Cirurgia Segura — Protótipo</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="sim-banner" role="status">⚠ AMBIENTE DE SIMULAÇÃO — DADOS FICTÍCIOS</div>
+  <div id="net-indicator" aria-live="polite"></div>
+  <header id="topbar" hidden>
+    <div class="topbar-inner">
+      <button id="btn-menu" class="icon-btn" aria-label="Menu">☰</button>
+      <span id="topbar-title">Cirurgia Segura</span>
+      <span class="topbar-spacer"></span>
+      <span id="topbar-user"></span>
+      <button id="btn-lock" class="icon-btn" title="Bloquear sessão" aria-label="Bloquear sessão">🔒</button>
+    </div>
+    <nav id="mainnav" aria-label="Navegação principal"></nav>
+  </header>
+  <main id="app" tabindex="-1"></main>
+  <div id="sheet-backdrop" hidden></div>
+  <div id="bottom-sheet" role="dialog" aria-modal="true" hidden></div>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

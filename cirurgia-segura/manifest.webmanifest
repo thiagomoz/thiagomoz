@@ -1,0 +1,15 @@
+{
+  "name": "Cirurgia Segura — Protótipo",
+  "short_name": "Cirurgia Segura",
+  "description": "Checklist de cirurgia segura da OMS digital + indicadores. Ambiente de simulação com dados fictícios.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f2f4f6",
+  "theme_color": "#0f4c81",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
