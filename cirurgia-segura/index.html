@@ -12,21 +12,22 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="sim-banner" role="status">⚠ AMBIENTE DE SIMULAÇÃO — DADOS FICTÍCIOS</div>
-  <div id="net-indicator" aria-live="polite"></div>
+  <div id="sim-banner" role="status">⚠ SIMULAÇÃO — DADOS FICTÍCIOS</div>
   <header id="topbar" hidden>
     <div class="topbar-inner">
-      <button id="btn-menu" class="icon-btn" aria-label="Menu">☰</button>
       <span id="topbar-title">Cirurgia Segura</span>
+      <nav id="mainnav" aria-label="Navegação principal"></nav>
       <span class="topbar-spacer"></span>
+      <span id="net-indicator" aria-live="polite"></span>
       <span id="topbar-user"></span>
       <button id="btn-lock" class="icon-btn" title="Bloquear sessão" aria-label="Bloquear sessão">🔒</button>
     </div>
-    <nav id="mainnav" aria-label="Navegação principal"></nav>
   </header>
   <main id="app" tabindex="-1"></main>
+  <nav id="tabbar" aria-label="Navegação" hidden></nav>
   <div id="sheet-backdrop" hidden></div>
   <div id="bottom-sheet" role="dialog" aria-modal="true" hidden></div>
+  <div id="success-overlay" aria-hidden="true" hidden><div class="success-check">✓</div><div class="success-msg"></div></div>
   <div id="toast" role="status" aria-live="polite" hidden></div>
   <script src="data.js"></script>
   <script src="app.js"></script>

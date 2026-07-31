@@ -89,15 +89,13 @@ function pendingCount() {
 function updateNetIndicator(state) {
   const el = document.getElementById('net-indicator');
   const pend = pendingCount();
-  if (state === 'syncing') {
-    el.className = 'syncing'; el.textContent = '⟳ Sincronizando…';
-  } else if (!navigator.onLine) {
-    el.className = 'offline';
-    el.textContent = pend ? `● Offline — ${pend} registro(s) pendente(s)` : '● Offline — registros salvos localmente';
-  } else {
-    el.className = '';
-    el.textContent = pend ? `● Online — ${pend} pendente(s)` : '● Online — tudo sincronizado';
-  }
+  let cls = '', label = 'Online';
+  if (state === 'syncing') { cls = 'syncing'; label = 'Sincronizando…'; }
+  else if (!navigator.onLine) { cls = 'offline'; label = pend ? `Offline · ${pend} pendente(s)` : 'Offline — salvo no aparelho'; }
+  else if (pend) { cls = 'syncing'; label = `${pend} pendente(s)`; }
+  el.className = cls;
+  el.innerHTML = `<span class="net-label">${esc(label)}</span>`;
+  el.title = label;
 }
 function marcarSync(obj) { obj.sync = navigator.onLine ? 'synced' : 'pending'; }
 function sincronizarPendentes() {
@@ -155,19 +153,26 @@ function idadeAnos(nasc) {
 const routes = [];
 function route(pattern, minPerfil, handler) { routes.push({ pattern, minPerfil, handler }); }
 function navigate(hash) { location.hash = hash; }
+let ultimaRota = null;
 function render() {
   const app = $('#app');
   const sess = getSession();
   const user = currentUser();
+  const hash = location.hash.replace(/^#/, '') || '/procedimentos';
+  if (hash !== ultimaRota) { window.scrollTo(0, 0); ultimaRota = hash; }
 
-  if (!user) { $('#topbar').hidden = true; viewLogin(app); return; }
-  if (sess.locked) { $('#topbar').hidden = true; viewPinLock(app); return; }
+  // modo foco: durante a execução de uma etapa a navegação some — só o checklist
+  document.body.classList.toggle('focus-mode', /\/etapa\//.test(hash));
+
+  if (!user) { $('#topbar').hidden = true; $('#tabbar').hidden = true; viewLogin(app); return; }
+  if (sess.locked) { $('#topbar').hidden = true; $('#tabbar').hidden = true; viewPinLock(app); return; }
 
   $('#topbar').hidden = false;
-  $('#topbar-user').textContent = `${user.nome} · ${user.perfil}`;
+  $('#tabbar').hidden = false;
+  const nomeCurto = user.nome.split(' ')[0];
+  $('#topbar-user').textContent = `${nomeCurto} · ${user.perfil}`;
   renderNav(user);
 
-  const hash = location.hash.replace(/^#/, '') || '/procedimentos';
   for (const r of routes) {
     const m = hash.match(r.pattern);
     if (m) {
@@ -181,23 +186,27 @@ function render() {
 }
 window.addEventListener('hashchange', render);
 
+// máx. 5 destinos (Hick); ícone + rótulo, ativos destacados (Jakob: padrão tab bar)
+const NAV_LINKS = [
+  ['/procedimentos', '🩺', 'Sala', 'enfermeiro'],
+  ['/pacientes', '🪪', 'Pacientes', 'enfermeiro'],
+  ['/painel', '📊', 'Painel', 'gestor'],
+  ['/auditoria', '🧾', 'Auditoria', 'gestor'],
+  ['/admin', '⚙️', 'Ajustes', 'admin'],
+];
 function renderNav(user) {
-  const nav = $('#mainnav');
   const hash = location.hash.replace(/^#/, '') || '/procedimentos';
-  const links = [
-    ['/procedimentos', '🩺 Procedimentos', 'enfermeiro'],
-    ['/pacientes', '🪪 Pacientes', 'enfermeiro'],
-    ['/painel', '📊 Painel', 'gestor'],
-    ['/auditoria', '🧾 Auditoria', 'gestor'],
-    ['/admin', '⚙️ Administração', 'admin'],
-  ];
-  nav.innerHTML = links
-    .filter(([, , min]) => NIVEL[user.perfil] >= NIVEL[min])
-    .map(([href, label]) =>
-      `<a href="#${href}" class="${hash.startsWith(href) ? 'active' : ''}">${label}</a>`)
-    .join('');
+  const ativos = NAV_LINKS.filter(([, , , min]) => NIVEL[user.perfil] >= NIVEL[min]);
+  const isActive = (href) =>
+    hash.startsWith(href) ||
+    (href === '/procedimentos' && hash.startsWith('/procedimento')) ||
+    (href === '/pacientes' && hash.startsWith('/paciente'));
+  $('#mainnav').innerHTML = ativos.map(([href, ic, label]) =>
+    `<a href="#${href}" class="${isActive(href) ? 'active' : ''}">${ic} ${label}</a>`).join('');
+  $('#tabbar').innerHTML = ativos.map(([href, ic, label]) =>
+    `<a href="#${href}" class="${isActive(href) ? 'active' : ''}" aria-label="${label}">
+      <span class="t-ic" aria-hidden="true">${ic}</span>${label}</a>`).join('');
 }
-$('#btn-menu').addEventListener('click', () => $('#mainnav').classList.toggle('collapsed'));
 $('#btn-lock').addEventListener('click', () => {
   const s = getSession();
   if (s) { s.locked = true; setSession(s); audit('bloqueou_sessao', 'session', null); render(); }
@@ -221,31 +230,50 @@ function registrarFalha(email) {
   return cur.ate || 0;
 }
 
+const PERFIL_LABEL = { enfermeiro: 'Enfermagem — executa o checklist', gestor: 'Gestão — painel e relatórios', admin: 'Administração — configurações' };
+const PERFIL_COR = { enfermeiro: '#0f4c81', gestor: '#6a4fa3', admin: '#3d6b4f' };
+
 function viewLogin(app, emailPreservado) {
+  const iniciais = (nome) => nome.split(' ').map((p) => p[0]).slice(0, 2).join('');
   app.innerHTML = `
     <div class="auth-wrap">
       <div class="auth-logo">🏥</div>
       <h1 style="text-align:center">Cirurgia Segura</h1>
-      <p class="sub" style="text-align:center">Checklist OMS digital + indicadores — protótipo de simulação</p>
-      <div class="card">
-        <form id="form-login" novalidate>
-          <label class="field">E-mail
-            <input type="email" name="email" required autocomplete="username" value="${esc(emailPreservado || '')}">
-          </label>
-          <label class="field">Senha
-            <input type="password" name="senha" required autocomplete="current-password">
-          </label>
-          <div class="field-error" id="login-error" role="alert"></div>
-          <button class="btn block" type="submit">Entrar</button>
-        </form>
-      </div>
-      <div class="card credencial-hint">
-        <strong>Usuários de simulação</strong> (senha <code>demo123</code>, PIN <code>1234</code>):<br>
-        Enfermeira — <code>ana.enfermeira@simulacao.br</code><br>
-        Gestora — <code>carla.gestora@simulacao.br</code><br>
-        Admin — <code>diego.admin@simulacao.br</code>
-      </div>
+      <p class="sub" style="text-align:center">Checklist OMS digital + indicadores</p>
+      <h2>Entrar como</h2>
+      ${DB.users.filter((u) => u.ativo).map((u) => `
+        <button class="persona-card" data-persona="${u.id}">
+          <span class="persona-avatar" style="background:${PERFIL_COR[u.perfil]}">${esc(iniciais(u.nome))}</span>
+          <span><span class="p-nome">${esc(u.nome)}</span><br>
+          <span class="p-perfil">${PERFIL_LABEL[u.perfil]}</span></span>
+          <span class="chevron">›</span>
+        </button>`).join('')}
+      <details class="manual-login" ${emailPreservado ? 'open' : ''}>
+        <summary>Entrar com e-mail e senha</summary>
+        <div class="card">
+          <form id="form-login" novalidate>
+            <label class="field">E-mail
+              <input type="email" name="email" required autocomplete="username" inputmode="email" value="${esc(emailPreservado || '')}">
+            </label>
+            <label class="field">Senha
+              <input type="password" name="senha" required autocomplete="current-password">
+            </label>
+            <div class="field-error" id="login-error" role="alert"></div>
+            <button class="btn block" type="submit">Entrar</button>
+          </form>
+          <p class="credencial-hint" style="margin:10px 0 0">Simulação: senha <code>demo123</code> · PIN <code>1234</code></p>
+        </div>
+      </details>
     </div>`;
+  app.querySelectorAll('[data-persona]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const u = DB.users.find((x) => x.id === btn.dataset.persona);
+      if (!u || !u.ativo) return;
+      setSession({ userId: u.id, lastActivity: Date.now(), locked: false });
+      audit('login', 'users', u.id, { metodo: 'persona_simulacao' });
+      navigate('/procedimentos'); render();
+    });
+  });
   $('#form-login').addEventListener('submit', (ev) => {
     ev.preventDefault();
     const email = ev.target.email.value.trim().toLowerCase();
@@ -305,7 +333,9 @@ function viewPinLock(app) {
         audit('desbloqueou_por_pin', 'session', null);
         render(); return;
       }
-      $('#pin-error').textContent = 'PIN incorreto.'; digitado = '';
+      $('#pin-error').textContent = 'PIN incorreto. Tente novamente.'; digitado = '';
+      const disp = $('#pin-display');
+      disp.classList.remove('pin-shake'); void disp.offsetWidth; disp.classList.add('pin-shake');
     } else if (digitado.length < 6) digitado += k;
     desenharDots();
   });
@@ -328,42 +358,86 @@ function viewAcessoNegado(app) {
 /* =========================================================
    PROCEDIMENTOS (RF-03) + fluxo do checklist
    ========================================================= */
+// progresso das 3 etapas de um procedimento (Zeigarnik: o que falta puxa a ação)
+function etapasFeitas(procId) {
+  return ETAPAS_ORDEM.filter((e) =>
+    DB.stages.some((s) => s.procedure_id === procId && s.etapa === e && s.confirmado_em));
+}
+function stageDotsHtml(procId, status) {
+  const feitas = etapasFeitas(procId);
+  const atualIdx = status === 'cancelado' ? -1 : feitas.length;
+  return `<span class="stage-dots" aria-label="${feitas.length} de 3 etapas concluídas">
+    ${ETAPAS_ORDEM.map((e, i) =>
+      `<span class="dot ${i < feitas.length ? 'done' : i === atualIdx ? 'current' : ''}"></span>`).join('')}
+  </span>`;
+}
+function proximaEtapa(procId) {
+  const feitas = etapasFeitas(procId);
+  return ETAPAS_ORDEM.find((e) => !feitas.includes(e));
+}
+
 route(/^\/procedimentos$/, 'enfermeiro', (app) => {
-  const ativos = DB.procedures.filter((p) => !['concluido', 'cancelado'].includes(p.status));
+  const pesoStatus = { em_cirurgia: 3, aguardando_time_out: 2, aguardando_sign_in: 1 };
+  const ativos = DB.procedures
+    .filter((p) => !['concluido', 'cancelado'].includes(p.status))
+    .sort((a, b) => (pesoStatus[b.status] - pesoStatus[a.status]) || a.data_prevista.localeCompare(b.data_prevista));
   const finalizados = DB.procedures.filter((p) => ['concluido', 'cancelado'].includes(p.status))
-    .sort((a, b) => b.data_prevista.localeCompare(a.data_prevista)).slice(0, 8);
+    .sort((a, b) => b.data_prevista.localeCompare(a.data_prevista)).slice(0, 5);
 
   // aviso de sala com 2 procedimentos ativos simultâneos
   const porSala = {};
   ativos.forEach((p) => { porSala[p.sala] = (porSala[p.sala] || 0) + 1; });
 
+  // a próxima ação da sala: o procedimento mais avançado (Von Restorff — um só destaque)
+  const destaque = ativos[0];
+  const restantes = ativos.slice(1);
+
+  const heroHtml = () => {
+    if (!destaque) return '';
+    const pac = paciente(destaque.patient_id);
+    const etapa = proximaEtapa(destaque.id);
+    const jaComecou = etapasFeitas(destaque.id).length > 0;
+    return `
+      <div class="hero-next">
+        <div class="eyebrow">Próxima ação · ${esc(destaque.sala)}</div>
+        <div class="nome">${esc(pac.nome)}</div>
+        <div class="meta">${esc(destaque.tipo)} · ${fmtDataHora(destaque.data_prevista)}
+          ${porSala[destaque.sala] > 1 ? ' · ⚠ 2 procedimentos nesta sala' : ''}</div>
+        <div class="row" style="margin-bottom:12px">${stageDotsHtml(destaque.id, destaque.status)}
+          <span style="font-size:.82rem;opacity:.9">${WHO_CHECKLIST[etapa].titulo} — ${WHO_CHECKLIST[etapa].subtitulo.toLowerCase()}</span></div>
+        <a class="btn" href="#/procedimento/${destaque.id}/etapa/${etapa}">
+          ${jaComecou ? 'Continuar' : 'Iniciar'} ${WHO_CHECKLIST[etapa].titulo} →</a>
+      </div>`;
+  };
+
   const cardProc = (p) => {
     const pac = paciente(p.patient_id);
+    const encerrado = ['concluido', 'cancelado'].includes(p.status);
     return `
       <div class="card proc-item" data-goto="/procedimento/${p.id}" role="button" tabindex="0">
         <div class="proc-main">
-          <div class="nome">${esc(pac ? pac.nome : '?')} · ${esc(p.tipo)}</div>
-          <div class="meta">${esc(p.sala)} · ${fmtDataHora(p.data_prevista)} · ${p.carater === 'urgencia' ? 'Urgência' : 'Eletiva'}</div>
+          <div class="nome">${esc(pac ? pac.nome : '?')}</div>
+          <div class="meta">${esc(p.tipo)} · ${esc(p.sala)} · ${fmtDataHora(p.data_prevista)}</div>
+          <div class="row" style="gap:8px">
+            ${stageDotsHtml(p.id, p.status)}
+            <span class="badge st-${p.status}">${STATUS_LABELS[p.status]}</span>
+            ${p.sync === 'pending' ? '<span class="badge pending-sync">⟳ pendente</span>' : ''}
+            ${!encerrado && porSala[p.sala] > 1 ? '<span class="badge warn-room">⚠ sala ocupada</span>' : ''}
+          </div>
         </div>
-        <div style="text-align:right">
-          <span class="badge st-${p.status}">${STATUS_LABELS[p.status]}</span>
-          ${p.sync === 'pending' ? '<br><span class="badge pending-sync">⟳ pendente de sincronização</span>' : ''}
-          ${porSala[p.sala] > 1 && !['concluido','cancelado'].includes(p.status) ? '<br><span class="badge warn-room">⚠ 2 procedimentos ativos nesta sala</span>' : ''}
-        </div>
+        <span class="chevron" aria-hidden="true">›</span>
       </div>`;
   };
 
   app.innerHTML = `
-    <h1>Procedimentos</h1>
-    <p class="sub">Fila da sala operatória — toque para abrir o checklist</p>
-    <div class="row" style="margin-bottom:14px">
-      <a class="btn" href="#/procedimento/novo">＋ Novo procedimento</a>
-    </div>
-    <h2>Ativos (${ativos.length})</h2>
-    ${ativos.length ? ativos.map(cardProc).join('') :
-      '<div class="card empty-state"><div class="big">🕊</div>Nenhum procedimento ativo.<br>Crie um novo para iniciar o checklist.</div>'}
+    <h1>Minha sala</h1>
+    <p class="sub">Fila da sala operatória — toque em um procedimento para abrir</p>
+    ${heroHtml()}
+    ${restantes.length ? `<h2>Na fila (${restantes.length})</h2>${restantes.map(cardProc).join('')}` : ''}
+    ${!ativos.length ? '<div class="card empty-state"><div class="big">🕊</div>Nenhum procedimento ativo.<br>Toque em <strong>＋ Novo</strong> para iniciar um checklist.</div>' : ''}
     <h2>Encerrados recentes</h2>
-    ${finalizados.length ? finalizados.map(cardProc).join('') : '<div class="card empty-state">Nenhum procedimento encerrado.</div>'}`;
+    ${finalizados.length ? finalizados.map(cardProc).join('') : '<div class="card empty-state">Nenhum procedimento encerrado.</div>'}
+    <a class="btn fab" href="#/procedimento/novo">＋ Novo</a>`;
   bindGoto(app);
 });
 
@@ -616,40 +690,65 @@ route(/^\/procedimento\/(proc-\d+)\/etapa\/(sign_in|time_out|sign_out)$/, 'enfer
 
   let confirmando = false; // idempotência do duplo toque
 
+  const idxEtapa = ETAPAS_ORDEM.indexOf(etapa);
+  const stepperHtml = () => `
+    <div class="stepper" aria-label="Etapa ${idxEtapa + 1} de 3">
+      ${ETAPAS_ORDEM.map((e, i) => `
+        ${i > 0 ? `<span class="bar ${i <= idxEtapa ? 'done' : ''}"></span>` : ''}
+        <span class="step ${i < idxEtapa ? 'done' : i === idxEtapa ? 'current' : ''}">
+          <span class="n">${i < idxEtapa ? '✓' : i + 1}</span>${WHO_CHECKLIST[e].titulo}
+        </span>`).join('')}
+    </div>`;
+
+  // rola até o próximo item sem resposta (reduz custo de interação em tela pequena)
+  const scrollProximoPendente = (aposKey) => {
+    const keys = def.itens.map((i) => i.key);
+    const inicio = aposKey ? keys.indexOf(aposKey) + 1 : 0;
+    const proxKey = [...keys.slice(inicio), ...keys.slice(0, inicio)].find((k) => !draft.respostas[k]);
+    if (!proxKey) return;
+    const el = app.querySelector(`[data-item="${proxKey}"]`);
+    if (el) el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  };
+
   const desenhar = () => {
     const respondidos = def.itens.filter((i) => draft.respostas[i.key]).length;
+    const completo = respondidos === def.itens.length;
     app.innerHTML = `
+      ${stepperHtml()}
       <div class="stage-context">
-        <div class="nome">${esc(pac.nome)} — ${esc(p.tipo)}</div>
-        <div class="meta">${esc(p.sala)} · ${def.titulo} · ${def.subtitulo}
-          ${pac.alergias ? ` · <strong>Alergias: ${esc(pac.alergias)}</strong>` : ''}</div>
+        <div class="nome">${esc(pac.nome)}</div>
+        <div class="meta">${esc(p.tipo)} · ${esc(p.sala)}
+          ${pac.alergias ? ` · <span class="alergia">⚠ Alergias: ${esc(pac.alergias)}</span>` : ''}</div>
+        <div class="stage-progress">
+          <div class="track"><div class="fill ${completo ? 'complete' : ''}" style="width:${(respondidos / def.itens.length) * 100}%"></div></div>
+          <span class="num">${respondidos}/${def.itens.length}</span>
+        </div>
       </div>
       <h1>${def.titulo}</h1>
-      <p class="sub">Marque cada item conduzindo a verificação em voz alta.</p>
+      <p class="sub">${def.subtitulo}. Conduza a verificação em voz alta.</p>
       <div id="itens">
         ${def.itens.map((item) => {
           const r = draft.respostas[item.key];
           const nc = draft.ncs[item.key];
           return `
-          <div class="card chk-item" data-item="${item.key}">
+          <div class="card chk-item ${r ? 'respondido' : ''}" data-item="${item.key}">
             <div class="texto">${esc(item.label)}
               ${item.critico ? '<span class="critico">Item crítico — NC exige justificativa</span>' : ''}
               ${r === 'nc' && nc ? `<span class="nc-tag">NC: ${esc(catLabel(nc.categoria))}${nc.observacao ? ' — ' + esc(nc.observacao) : ''}</span>` : ''}
             </div>
             <div class="chk-opts" role="group" aria-label="Resposta">
               <button class="chk-opt opt-conforme" data-r="conforme" aria-pressed="${r === 'conforme'}"><span class="ic">✓</span>Conforme</button>
-              <button class="chk-opt opt-nc" data-r="nc" aria-pressed="${r === 'nc'}"><span class="ic">✕</span>Não<br>conforme</button>
+              <button class="chk-opt opt-nc" data-r="nc" aria-pressed="${r === 'nc'}"><span class="ic">✕</span>Não conforme</button>
               <button class="chk-opt opt-na" data-r="na" aria-pressed="${r === 'na'}"><span class="ic">—</span>N/A</button>
             </div>
           </div>`;
         }).join('')}
       </div>
-      <div style="height:70px"></div>
+      <div style="height:78px"></div>
       <div class="confirm-bar"><div class="inner">
-        <span class="progress-note grow">${respondidos}/${def.itens.length} itens respondidos</span>
         <a class="btn secondary small" href="#/procedimento/${procId}">Pausar</a>
-        <button class="btn" id="btn-confirmar" ${respondidos === def.itens.length ? '' : 'disabled'}>
-          Confirmar ${def.titulo}
+        <button class="btn" id="btn-confirmar" ${completo ? '' : 'disabled'}>
+          ${completo ? `Confirmar ${def.titulo} ✓` : `Faltam ${def.itens.length - respondidos} item(ns)`}
         </button>
       </div></div>`;
 
@@ -662,12 +761,12 @@ route(/^\/procedimento\/(proc-\d+)\/etapa\/(sign_in|time_out|sign_out)$/, 'enfer
             abrirSheetNC(etapa, key, draft.ncs[key], (nc) => {
               draft.respostas[key] = 'nc';
               draft.ncs[key] = nc;
-              salvarDraft(); desenhar();
+              salvarDraft(); desenhar(); scrollProximoPendente(key);
             });
           } else {
             draft.respostas[key] = r;
             delete draft.ncs[key];
-            salvarDraft(); desenhar();
+            salvarDraft(); desenhar(); scrollProximoPendente(key);
           }
         });
       });
@@ -679,6 +778,7 @@ route(/^\/procedimento\/(proc-\d+)\/etapa\/(sign_in|time_out|sign_out)$/, 'enfer
       if (pendentes.length) {
         desenhar();
         pendentes.forEach((i) => app.querySelector(`[data-item="${i.key}"]`).classList.add('pendente-erro'));
+        scrollProximoPendente(null);
         toast('Responda os itens destacados antes de confirmar.');
         return;
       }
@@ -689,6 +789,10 @@ route(/^\/procedimento\/(proc-\d+)\/etapa\/(sign_in|time_out|sign_out)$/, 'enfer
   desenhar();
 });
 
+const NC_ICONES = {
+  material_indisponivel: '📦', divergencia_identificacao: '🪪', falha_equipamento: '🔌',
+  medicacao: '💊', contagem_divergente: '🔢', outro: '✏️',
+};
 function abrirSheetNC(etapa, itemKey, atual, onConfirm) {
   const item = WHO_CHECKLIST[etapa].itens.find((i) => i.key === itemKey);
   const obrigatoriaJustificativa = !!item.critico; // contagem no Sign Out (RF-06)
@@ -698,7 +802,8 @@ function abrirSheetNC(etapa, itemKey, atual, onConfirm) {
     <p class="sub">${esc(item.label)}</p>
     <div class="cat-grid" id="nc-cats">
       ${NC_CATEGORIAS.map((c) =>
-        `<button class="cat-btn" data-cat="${c.key}" aria-pressed="${categoria === c.key}">${c.label}</button>`).join('')}
+        `<button class="cat-btn" data-cat="${c.key}" aria-pressed="${categoria === c.key}">
+          <span class="c-ic" aria-hidden="true">${NC_ICONES[c.key] || '▪'}</span>${c.label}</button>`).join('')}
     </div>
     <label class="field">Observação${obrigatoriaJustificativa ? ' * (obrigatória: divergência de contagem é evento crítico)' : ' (opcional)'}
       <textarea id="nc-obs">${esc(atual ? atual.observacao : '')}</textarea>
@@ -717,6 +822,7 @@ function abrirSheetNC(etapa, itemKey, atual, onConfirm) {
     categoria = b.dataset.cat;
     document.querySelectorAll('#nc-cats .cat-btn').forEach((x) => x.setAttribute('aria-pressed', x === b));
   });
+  if (obrigatoriaJustificativa) $('#nc-obs').focus();
   $('#nc-cancel').addEventListener('click', fecharSheet);
   $('#nc-ok').addEventListener('click', () => {
     const obs = $('#nc-obs').value.trim();
@@ -758,10 +864,19 @@ function confirmarEtapa(p, etapa, draft, draftKey) {
   audit('confirmou_etapa', 'checklist_stages', stageId, { etapa, procedimento: p.id });
   localStorage.removeItem(draftKey);
   updateNetIndicator(); sincronizarPendentes();
-  toast(navigator.onLine
-    ? `${WHO_CHECKLIST[etapa].titulo} confirmado ✔`
-    : `${WHO_CHECKLIST[etapa].titulo} salvo localmente — sincroniza ao reconectar ✔`);
-  navigate(`/procedimento/${p.id}`);
+  const msg = etapa === 'sign_out'
+    ? 'Checklist completo — procedimento concluído'
+    : navigator.onLine ? `${WHO_CHECKLIST[etapa].titulo} confirmado` : `${WHO_CHECKLIST[etapa].titulo} salvo no aparelho — sincroniza ao reconectar`;
+  mostrarSucesso(msg, () => navigate(`/procedimento/${p.id}`));
+}
+
+// confirmação visual clara e breve ao fim de cada etapa (peak-end + Doherty)
+function mostrarSucesso(msg, depois) {
+  const ov = $('#success-overlay');
+  ov.querySelector('.success-msg').textContent = msg;
+  ov.hidden = false;
+  setTimeout(() => { ov.hidden = true; depois(); },
+    matchMedia('(prefers-reduced-motion: reduce)').matches ? 350 : 850);
 }
 
 /* ---------------- bottom sheet genérico ---------------- */
@@ -915,31 +1030,31 @@ route(/^\/painel$/, 'gestor', (app) => {
   app.innerHTML = `
     <h1>Painel de indicadores</h1>
     <p class="sub">Cada checklist confirmado alimenta os indicadores automaticamente — zero tabulação manual.</p>
-    <div class="card row" id="filtros">
-      <label class="field" style="margin:0">Período
-        <select data-f="periodo">
-          <option value="7" ${filtroPainel.periodo === '7' ? 'selected' : ''}>Últimos 7 dias</option>
-          <option value="30" ${filtroPainel.periodo === '30' ? 'selected' : ''}>Últimos 30 dias</option>
-          <option value="90" ${filtroPainel.periodo === '90' ? 'selected' : ''}>Últimos 90 dias</option>
-        </select></label>
-      <label class="field" style="margin:0">Sala
-        <select data-f="sala"><option value="">Todas</option>${opcoes(DB.salas, filtroPainel.sala)}</select></label>
-      <label class="field" style="margin:0">Tipo
-        <select data-f="tipo"><option value="">Todos</option>${opcoes(DB.tiposProcedimento, filtroPainel.tipo)}</select></label>
-      <label class="field" style="margin:0">Caráter
-        <select data-f="carater">
-          <option value="">Todos</option>
+    <div class="card" id="filtros">
+      <div class="row" style="justify-content:space-between">
+        <div class="seg-control" role="group" aria-label="Período">
+          ${['7', '30', '90'].map((d) =>
+            `<button data-periodo="${d}" aria-pressed="${filtroPainel.periodo === d}">${d} dias</button>`).join('')}
+        </div>
+        <div class="row" style="gap:8px">
+          <button class="btn secondary small" id="btn-csv">⬇ CSV</button>
+          <button class="btn secondary small" id="btn-print">🖨 Relatório</button>
+        </div>
+      </div>
+      <div class="filtro-selects">
+        <select data-f="sala" aria-label="Sala"><option value="">Todas as salas</option>${opcoes(DB.salas, filtroPainel.sala)}</select>
+        <select data-f="tipo" aria-label="Tipo"><option value="">Todos os tipos</option>${opcoes(DB.tiposProcedimento, filtroPainel.tipo)}</select>
+        <select data-f="carater" aria-label="Caráter">
+          <option value="">Eletiva + urgência</option>
           <option value="eletiva" ${filtroPainel.carater === 'eletiva' ? 'selected' : ''}>Eletiva</option>
           <option value="urgencia" ${filtroPainel.carater === 'urgencia' ? 'selected' : ''}>Urgência</option>
-        </select></label>
-      <span class="grow"></span>
-      <button class="btn secondary small" id="btn-csv">⬇ Exportar CSV</button>
-      <button class="btn secondary small" id="btn-print">🖨 Relatório</button>
+        </select>
+      </div>
     </div>
     ${!procs.length ? `
       <div class="card empty-state viz-root"><div class="big">📭</div>
         <strong>Sem procedimentos no período</strong><br>Ajuste os filtros acima.</div>` : `
-    <div class="grid-4">
+    <div class="grid-tiles" style="margin-bottom:12px">
       <div class="card stat-tile viz-root"><div class="valor">${procs.length}</div>
         <div class="rotulo">Procedimentos</div><div class="detalhe">${procs.length - validos.length} cancelado(s)</div></div>
       <div class="card stat-tile viz-root"><div class="valor">${pct(completos, validos.length)}%</div>
@@ -963,6 +1078,9 @@ route(/^\/painel$/, 'gestor', (app) => {
 
   app.querySelectorAll('#filtros select').forEach((sel) => {
     sel.addEventListener('change', () => { filtroPainel[sel.dataset.f] = sel.value; render(); });
+  });
+  app.querySelectorAll('#filtros [data-periodo]').forEach((b) => {
+    b.addEventListener('click', () => { filtroPainel.periodo = b.dataset.periodo; render(); });
   });
   const btnCsv = $('#btn-csv');
   if (btnCsv) btnCsv.addEventListener('click', exportarCSV);

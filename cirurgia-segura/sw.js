@@ -1,5 +1,5 @@
 /* Service worker — app shell offline-first (RF-11) */
-const CACHE = 'cirurgia-segura-v1';
+const CACHE = 'cirurgia-segura-v2';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'data.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', (e) => {

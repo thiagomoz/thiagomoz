@@ -45,6 +45,22 @@ Permissões cumulativas (Admin ⊃ Gestor ⊃ Enfermeiro), como no PRD.
 | RF-11 | Fluxo crítico funciona offline (armazenamento local), badge "pendente de sincronização", sincronização automática ao reconectar preservando timestamps originais, indicador online/offline/sincronizando | ✅ (simulado client-side) |
 | RF-12 | Configuração do checklist | ➖ V2 (checklist OMS fixo, como previsto) |
 
+## Decisões de UX (v2 — mobile-first)
+
+A interface aplica leis de UX documentadas, com foco em uso com uma mão em tablet/celular:
+
+| Lei / princípio | Aplicação no app |
+|---|---|
+| **Lei de Fitts** (alvos grandes e próximos do polegar) | Tab bar inferior fixa, FAB "＋ Novo", alvos ≥ 48 px, botão de confirmação ocupando a largura da barra inferior |
+| **Lei de Hick** (menos escolhas = decisão mais rápida) | Máx. 5 destinos na navegação, 1 CTA em destaque por tela, filtros de período como controle segmentado de 3 opções |
+| **Von Restorff** (destaque único) | Card "Próxima ação" é o único elemento de alto contraste na home |
+| **Zeigarnik / goal-gradient** (progresso visível puxa conclusão) | Pontos de progresso das 3 etapas em cada card; barra de progresso de itens na etapa; botão mostra "Faltam N item(ns)" |
+| **Lei de Jakob** (padrões conhecidos) | Tab bar, bottom-sheet com alça, FAB, cartões com chevron — padrões nativos de iOS/Android |
+| **Doherty** (< 400 ms) | Tudo local: resposta imediata; rolagem automática ao próximo item pendente |
+| **Peak-end** | Confirmação de etapa fecha com tela de sucesso breve e mensagem clara |
+| **Reconhecimento > memorização** | Login por cartões de persona na simulação (sem digitar e-mail) |
+| **Prevenção de erro** | Modo foco durante o checklist (navegação some), justificativa obrigatória em NC de contagem, sequência de etapas travada |
+
 ## Arquitetura desta fase
 
 - **PWA estática** (HTML/CSS/JS puros, sem dependências) — `index.html`, `app.js`, `data.js`, `styles.css`, `sw.js`.
